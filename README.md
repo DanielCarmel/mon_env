@@ -33,6 +33,6 @@ Password: admin
 ```
 * To stop and remove the monitoring environment just run the following command: `sudo python3 ./mon_env.py --stop`
 
-###Technical notes:
+### Technical notes:
 - The tool must to run with root privileges to work as expected
 - The version arguments only accepts the docker hub images versions format(see example field).
