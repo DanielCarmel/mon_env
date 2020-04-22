@@ -22,7 +22,7 @@ optional arguments:
 ```
 
 ## Example
-- Run `sudo python3 ./mon_env.py --start --prometheus-retention=13h` to run \
+- Run `sudo python3 ./mon_env.py --start --prometheus-retention=13h  --prometheus=v1.8.2` to run \
 monitoring environment with the latest version of Prometheus, Node exporter \
 and Grafana, it is optional to specify the tool version.
 - To access the dashboard browse `http://localhost:3000`
@@ -33,5 +33,6 @@ Password: admin
 ```
 * To stop and remove the monitoring environment just run the following command: `sudo python3 ./mon_env.py --stop`
 
-(Note: the tool must to run with root privileges to work as expected)
-
+###Technical notes:
+- The tool must to run with root privileges to work as expected
+- The version arguments only accepts the docker hub images versions format(see example field).

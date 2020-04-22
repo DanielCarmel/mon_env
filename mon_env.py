@@ -87,7 +87,7 @@ def start_monitor():
   while not is_grafana_up:
     try:
       res = json.loads(requests.get('http://localhost:3000/api/health', headers={"Accept": "application/json"}).text)['database']
-      print(res)
+
       if res == 'ok':
         is_grafana_up = True
     except:
@@ -128,6 +128,9 @@ def start_monitor():
 
   # Send the request
   requests.post(url=grafana_post_dashboard_url, headers=grafana_post_headers, data=grafana_post_dashboard_data).text
+
+  print('All set! you can access the dashboards here: http://localhost:3000 (username: admin, password: admin)')
+  print('To stop monitoring enter command: `./mon_env.py --stop`')
 
 
 # Stop monitoring 

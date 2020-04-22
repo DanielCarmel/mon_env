@@ -16,7 +16,7 @@
         "gnetId": 1860,
         "graphTooltip": 0,
         "id": null,
-        "iteration": 1587554008930,
+        "iteration": 1587585170822,
         "links": [],
         "panels": [{
                 "aliasColors": {
@@ -729,6 +729,185 @@
                     "align": false,
                     "alignLevel": null
                 }
+            }, {
+                "aliasColors": {},
+                "bars": false,
+                "cacheTimeout": null,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Prometheus_ds",
+                "fill": 1,
+                "fillGradient": 0,
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 14
+                },
+                "hiddenSeries": false,
+                "id": 304,
+                "legend": {
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "options": {
+                    "dataLinks": []
+                },
+                "percentage": false,
+                "pluginVersion": "6.7.2",
+                "pointradius": 2,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": false,
+                "steppedLine": false,
+                "targets": [{
+                        "expr": "histogram_quantile(0.95, sum(rate(prometheus_local_storage_series_chunks_persisted_bucket[5m])) by (le))",
+                        "interval": "",
+                        "legendFormat": "Chuncks",
+                        "refId": "A"
+                    }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "Prometheus local storage chunks",
+                "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                },
+                "yaxes": [{
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                    }, {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                    }
+                ],
+                "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                }
+            }, {
+                "datasource": "Prometheus_ds",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 22
+                },
+                "id": 306,
+                "options": {
+                    "fieldOptions": {
+                        "calcs": [
+                            "mean"
+                        ],
+                        "defaults": {
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [{
+                                        "color": "green",
+                                        "value": null
+                                    }, {
+                                        "color": "red",
+                                        "value": 1
+                                    }
+                                ]
+                            }
+                        },
+                        "overrides": [],
+                        "values": false
+                    },
+                    "orientation": "auto",
+                    "showThresholdLabels": false,
+                    "showThresholdMarkers": true
+                },
+                "pluginVersion": "6.7.2",
+                "targets": [{
+                        "expr": "scrape_duration_seconds",
+                        "interval": "",
+                        "legendFormat": "{{ job }}",
+                        "refId": "A"
+                    }
+                ],
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Scrape Duration in Seconds",
+                "type": "gauge"
+            }, {
+                "datasource": "Prometheus_ds",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 22
+                },
+                "id": 302,
+                "options": {
+                    "displayMode": "lcd",
+                    "fieldOptions": {
+                        "calcs": [
+                            "mean"
+                        ],
+                        "defaults": {
+                            "mappings": [],
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [{
+                                        "color": "green",
+                                        "value": null
+                                    }
+                                ]
+                            },
+                            "title": ""
+                        },
+                        "overrides": [],
+                        "values": false
+                    },
+                    "orientation": "vertical",
+                    "showUnfilled": true
+                },
+                "pluginVersion": "6.7.2",
+                "targets": [{
+                        "expr": "promhttp_metric_handler_requests_total",
+                        "interval": "",
+                        "legendFormat": "code {{code}}",
+                        "refId": "A"
+                    }
+                ],
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Prometheus http codes sum",
+                "type": "bargauge"
             }
         ],
         "refresh": false,
@@ -756,8 +935,8 @@
                 }, {
                     "allValue": null,
                     "current": {
-                        "text": "local_node_exporter_job",
-                        "value": "local_node_exporter_job"
+                        "text": "node_exporter_job",
+                        "value": "node_exporter_job"
                     },
                     "datasource": "Prometheus_ds",
                     "definition": "",
@@ -781,8 +960,8 @@
                 }, {
                     "allValue": null,
                     "current": {
-                        "text": "44baa0690eac",
-                        "value": "44baa0690eac"
+                        "text": "03e2164e67eb",
+                        "value": "03e2164e67eb"
                     },
                     "datasource": "Prometheus_ds",
                     "definition": "",
@@ -857,8 +1036,8 @@
             ]
         },
         "time": {
-            "from": "now-30m",
-            "to": "now"
+            "from": "2020-04-22T21:56:27.836Z",
+            "to": "2020-04-22T22:08:07.684Z"
         },
         "timepicker": {
             "refresh_intervals": [
@@ -891,6 +1070,6 @@
         "variables": {
             "list": []
         },
-        "version": 2
+        "version": 4
     }
 }
