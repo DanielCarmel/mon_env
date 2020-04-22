@@ -39,22 +39,33 @@ def start_monitor():
   ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
   netwok_bridge = client.networks.create(config['NETWORK']['BRIDGE_NAME'], driver="bridge", check_duplicate=True, ipam=ipam_config)
 
+  # Pull images
+  prometheus_image = client.images.pull(config['PROMETHEUS']['DOCKERHUB'] + args.prometheus)
+  node_exporter_image = client.images.pull(config['NODE_EXPORTER']['DOCKERHUB'] + args.node_exporter)
+  grafana_image = client.images.pull(config['GRAFANA']['DOCKERHUB'] + args.grafana)
+
+  # Validate Prometheus version(This action command is different between 1.x.x and 2.x.x versions)
+  if args.prometheus_retention[0] is '2':
+    set_retention_time_command = '--storage.tsdb.retention.time='
+  else:
+    set_retention_time_command = '-storage.local.retention='
+
   # Run Prometheus docker container
-  prometheus_container = client.containers.create(config['PROMETHEUS']['DOCKERHUB'] + args.prometheus,
+  prometheus_container = client.containers.create(prometheus_image,
                                               detach=True,
                                               ports={str(config['PROMETHEUS']['PORT']) + '/tcp': config['PROMETHEUS']['PORT']},
                                               volumes={config['ENV']['CONF_PATH'] + config['PROMETHEUS']['YML']: {'bind': '/etc/prometheus/' + config['PROMETHEUS']['YML'], 'mode': 'ro'}},
-                                              command=['--storage.tsdb.retention.time=' + args.prometheus_retention, '--config.file=/etc/prometheus/prometheus.yml'],
+                                              command=['--config.file=/etc/prometheus/prometheus.yml', set_retention_time_command + args.prometheus_retention],
                                               name=config['PROMETHEUS']['CONTAINER_NAME'])
 
   # Run node_exporter docker container
-  node_exporter_container = client.containers.create(config['NODE_EXPORTER']['DOCKERHUB'] + args.prometheus,
+  node_exporter_container = client.containers.create(node_exporter_image,
                                                   detach=True, ports={str(config['NODE_EXPORTER']['PORT']) + '/tcp': config['NODE_EXPORTER']['PORT']},
                                                   volumes={'/': {'bind': '/host', 'mode': 'ro,rslave'}},
                                                   name=config['NODE_EXPORTER']['CONTAINER_NAME'])
 
   # Run Grafana docker container
-  grafana_container = client.containers.create(config['GRAFANA']['DOCKERHUB'] + args.prometheus,
+  grafana_container = client.containers.create(grafana_image,
                                               detach=True,
                                               ports={str(config['GRAFANA']['PORT']) + '/tcp': config['GRAFANA']['PORT']},
                                               volumes={config['ENV']['CONF_PATH'] + 'grafana.ini': {'bind': '/etc/grafana/' + config['GRAFANA']['INI'], 'mode': 'ro'}},
@@ -69,10 +80,18 @@ def start_monitor():
   node_exporter_container.start()
   grafana_container.start()
 
-
   ### Retreiving Grafana API token
-  # TODO: wait somehow for Grafana docker to init
-  time.sleep(5)
+  # Wait somehow for Grafana docker to start
+  is_grafana_up = False
+
+  while not is_grafana_up:
+    try:
+      res = json.loads(requests.get('http://localhost:3000/api/health', headers={"Accept": "application/json"}).text)['database']
+      print(res)
+      if res == 'ok':
+        is_grafana_up = True
+    except:
+      continue
 
   # Switch to new grafana org
   res = requests.post(url='http://admin:admin@localhost:3000/api/orgs', headers={"Content-Type": "application/json"}, data='{"name":"mon_env_conf_org"}')
