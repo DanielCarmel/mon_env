@@ -1,3 +1,4 @@
+import re
 import time
 import json
 import docker
@@ -45,10 +46,15 @@ def start_monitor():
   grafana_image = client.images.pull(config['GRAFANA']['DOCKERHUB'] + args.grafana)
 
   # Validate Prometheus version(This action command is different between 1.x.x and 2.x.x versions)
-  if args.prometheus_retention[0] is '2':
-    set_retention_time_command = '--storage.tsdb.retention.time='
+  prom_version = args.prometheus[re.search(r"\d", args.prometheus).start()]
+  
+  if args.prometheus is not 'latest':
+    if prom_version is '2':
+      set_retention_time_command = '--storage.tsdb.retention.time='
+    elif prom_version is '1':
+      set_retention_time_command = '-storage.local.retention='
   else:
-    set_retention_time_command = '-storage.local.retention='
+    set_retention_time_command = '--storage.tsdb.retention.time='
 
   # Run Prometheus docker container
   prometheus_container = client.containers.create(prometheus_image,
