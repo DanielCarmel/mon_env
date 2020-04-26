@@ -45,10 +45,10 @@ def start_monitor():
   node_exporter_image = client.images.pull(config['NODE_EXPORTER']['DOCKERHUB'] + args.node_exporter)
   grafana_image = client.images.pull(config['GRAFANA']['DOCKERHUB'] + args.grafana)
 
-  # Validate Prometheus version(This action command is different between 1.x.x and 2.x.x versions)
-  prom_version = args.prometheus[re.search(r"\d", args.prometheus).start()]
-  
+  # Validate Prometheus version(This action command is different between 1.x.x and 2.x.x versions)  
   if args.prometheus is not 'latest':
+    prom_version = args.prometheus[re.search(r"\d", args.prometheus).start()]
+    
     if prom_version is '2':
       set_retention_time_command = '--storage.tsdb.retention.time='
     elif prom_version is '1':
@@ -162,5 +162,5 @@ def stop_monitor():
 ########### Main ###########
 if args.start:
   start_monitor()
-else:
+elif args.stop:
   stop_monitor()
