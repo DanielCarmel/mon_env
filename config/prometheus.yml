@@ -26,9 +26,9 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-    - targets: ['172.18.0.3:9100']
+    - targets: ['mon_node_exporter:9100']
 
   - job_name: 'prometheus_job'
   
     static_configs:
-        - targets: ['172.18.0.2:9090']
+        - targets: ['mon_prometheus:9090']

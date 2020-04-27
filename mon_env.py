@@ -36,19 +36,12 @@ def start_monitor():
   client = docker.from_env()
 
   # Create new docker netwok bridge
-  ipam_pool = docker.types.IPAMPool(subnet=config['NETWORK']['SUBNET'], gateway=config['NETWORK']['GATEWAY'])
-  ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
-  netwok_bridge = client.networks.create(config['NETWORK']['BRIDGE_NAME'], driver="bridge", check_duplicate=True, ipam=ipam_config)
+  netwok_bridge = client.networks.create(config['NETWORK']['BRIDGE_NAME'], driver="bridge", check_duplicate=True)
 
-  # Pull images
-  prometheus_image = client.images.pull(config['PROMETHEUS']['DOCKERHUB'] + args.prometheus)
-  node_exporter_image = client.images.pull(config['NODE_EXPORTER']['DOCKERHUB'] + args.node_exporter)
-  grafana_image = client.images.pull(config['GRAFANA']['DOCKERHUB'] + args.grafana)
-
-  # Validate Prometheus version(This action command is different between 1.x.x and 2.x.x versions)  
+  # Validate Prometheus version(This action command is different between 1.x.x and 2.x.x versions)
   if args.prometheus is not 'latest':
     prom_version = args.prometheus[re.search(r"\d", args.prometheus).start()]
-    
+  
     if prom_version is '2':
       set_retention_time_command = '--storage.tsdb.retention.time='
     elif prom_version is '1':
@@ -57,34 +50,28 @@ def start_monitor():
     set_retention_time_command = '--storage.tsdb.retention.time='
 
   # Run Prometheus docker container
-  prometheus_container = client.containers.create(prometheus_image,
+  prometheus_container = client.containers.run(config['PROMETHEUS']['DOCKERHUB'] + args.prometheus,
                                               detach=True,
                                               ports={str(config['PROMETHEUS']['PORT']) + '/tcp': config['PROMETHEUS']['PORT']},
                                               volumes={config['ENV']['CONF_PATH'] + config['PROMETHEUS']['YML']: {'bind': '/etc/prometheus/' + config['PROMETHEUS']['YML'], 'mode': 'ro'}},
                                               command=['--config.file=/etc/prometheus/prometheus.yml', set_retention_time_command + args.prometheus_retention],
-                                              name=config['PROMETHEUS']['CONTAINER_NAME'])
+                                              name=config['PROMETHEUS']['CONTAINER_NAME'],
+                                              network=config['NETWORK']['BRIDGE_NAME'])
 
   # Run node_exporter docker container
-  node_exporter_container = client.containers.create(node_exporter_image,
+  node_exporter_container = client.containers.run(config['NODE_EXPORTER']['DOCKERHUB'] + args.node_exporter,
                                                   detach=True, ports={str(config['NODE_EXPORTER']['PORT']) + '/tcp': config['NODE_EXPORTER']['PORT']},
                                                   volumes={'/': {'bind': '/host', 'mode': 'ro,rslave'}},
-                                                  name=config['NODE_EXPORTER']['CONTAINER_NAME'])
+                                                  name=config['NODE_EXPORTER']['CONTAINER_NAME'],
+                                                  network=config['NETWORK']['BRIDGE_NAME'])
 
   # Run Grafana docker container
-  grafana_container = client.containers.create(grafana_image,
+  grafana_container = client.containers.run(config['GRAFANA']['DOCKERHUB'] + args.grafana,
                                               detach=True,
                                               ports={str(config['GRAFANA']['PORT']) + '/tcp': config['GRAFANA']['PORT']},
                                               volumes={config['ENV']['CONF_PATH'] + 'grafana.ini': {'bind': '/etc/grafana/' + config['GRAFANA']['INI'], 'mode': 'ro'}},
-                                              name=config['GRAFANA']['CONTAINER_NAME'])
-
-  # Connect containers to network bridge
-  netwok_bridge.connect(container=prometheus_container, ipv4_address=config['PROMETHEUS']['IP'])
-  netwok_bridge.connect(container=node_exporter_container, ipv4_address=config['NODE_EXPORTER']['IP'])
-  netwok_bridge.connect(container=grafana_container, ipv4_address=config['GRAFANA']['IP'])
-
-  prometheus_container.start()
-  node_exporter_container.start()
-  grafana_container.start()
+                                              name=config['GRAFANA']['CONTAINER_NAME'],
+                                              network=config['NETWORK']['BRIDGE_NAME'])
 
   ### Retreiving Grafana API token
   # Wait somehow for Grafana docker to start
@@ -120,7 +107,7 @@ def start_monitor():
   grafana_post_datasource_data = json.dumps({
     'name': 'Prometheus_ds',
     'type': 'prometheus',
-    'url': 'http://'+ config['PROMETHEUS']['IP'] +':' + str(config['PROMETHEUS']['PORT']),
+    'url': 'http://'+ config['PROMETHEUS']['CONTAINER_NAME'] +':' + str(config['PROMETHEUS']['PORT']),
     'access': 'proxy',
     'basicAuth': False
   })
@@ -162,5 +149,5 @@ def stop_monitor():
 ########### Main ###########
 if args.start:
   start_monitor()
-elif args.stop:
+else:
   stop_monitor()

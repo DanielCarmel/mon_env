@@ -4,30 +4,25 @@
 		"LOCAL_CONF_PATH": "./config/"
 	},
 	"NETWORK": {
-		"BRIDGE_NAME": "mon_env_conf_bridge",
-		"SUBNET": "172.18.0.0/16",
-		"GATEWAY": "172.18.0.1"
+		"BRIDGE_NAME": "mon_env_conf_bridge"
 	},
 	"PROMETHEUS": {
 		"CONTAINER_NAME": "mon_prometheus",
 		"YML": "prometheus.yml",
 		"DOCKERHUB": "prom/prometheus:",
-		"PORT": 9090,
-		"IP": "172.18.0.2"
+		"PORT": 9090
 	},
 	"NODE_EXPORTER": {
 		"CONTAINER_NAME": "mon_node_exporter",
 		"DOCKERHUB": "prom/node-exporter:",
-		"PORT": 9100,
-		"IP": "172.18.0.3"
+		"PORT": 9100
 	},
 	"GRAFANA": {
 		"CONTAINER_NAME" : "mon_grafana",
 		"DASHBOAD_FILENAME": "dashboard.json",
 		"INI": "grafana.ini",
 		"DOCKERHUB" : "grafana/grafana:",
-		"PORT" : 3000,
-		"IP" : "172.18.0.4"
+		"PORT" : 3000
 	},
 	"CONTAINERS_LIST": [
 		"mon_prometheus",
